@@ -88,24 +88,68 @@ Common failure modes in AI-generated ML work, and what this skill enforces:
 
 ## Install the skill
 
-Copy or link this folder into your agent's skills directory:
+### Option 1: One-Prompt Install (Easiest)
 
+Paste this prompt directly into your agent (Claude Code, OpenCode, Roo Code, etc.):
+
+> "Clone https://github.com/turki013/data-science-ml-specialist and install it into your skills directory."
+
+---
+
+### Option 2: Manual Installation
+
+First, clone the repository:
+```bash
+git clone https://github.com/turki013/data-science-ml-specialist.git 
+cd data-science-ml-specialist
+```
+Then copy it to your preferred agent directory:
 
 ## Claude Code
+Linux / macOS:
 ```bash
-cp -r data-science-ml-specialist ~/.claude/skills/data-science-ml-specialist
+mkdir -p ~/.claude/skills
+cp -r . ~/.claude/skills/data-science-ml-specialist
+```
+Windows (PowerShell):
+```bash
+New-Item -ItemType Directory -Force -Path "$HOME\.claude\skills"
+Copy-Item -Recurse -Force . "$HOME\.claude\skills\data-science-ml-specialist"
 ```
 # OpenCode
+Linux / macOS:
 ```bash
-cp -r data-science-ml-specialist ~/.config/opencode/skills/data-science-ml-specialist
+mkdir -p ~/.opencode/skills
+cp -r . ~/.opencode/skills/data-science-ml-specialist
 ```
-# Antigravity
+Windows (PowerShell):
 ```bash
-cp -r data-science-ml-specialist ~/.antigravity/skills/data-science-ml-specialist
+mkdir -p ~/.opencode/skills
+cp -r . ~/.opencode/skills/data-science-ml-specialist
+```
+
+# Antigravity
+
+Linux / macOS:
+```bash
+mkdir -p ~/.antigravity/skills
+cp -r . ~/.antigravity/skills/data-science-ml-specialist
+```
+Windows (PowerShell):
+```bash
+New-Item -ItemType Directory -Force -Path "$HOME\.antigravity\skills"
+Copy-Item -Recurse -Force . "$HOME\.antigravity\skills\data-science-ml-specialist"
 ```
 # Project / Workspace level (any agent)
+Linux / macOS:
 ```bash
-cp -r data-science-ml-specialist .agent/skills/data-science-ml-specialist
+mkdir -p .skills
+cp -r . .skills/data-science-ml-specialist
+```
+Windows (PowerShell):
+```bash
+New-Item -ItemType Directory -Force -Path ".skills"
+Copy-Item -Recurse -Force . ".skills\data-science-ml-specialist"
 ```
 
 ## Use the tooling in a project
