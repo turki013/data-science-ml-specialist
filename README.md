@@ -66,6 +66,26 @@ data-science-ml-specialist/
 
 **`scripts/dstk/` helpers:** stats, ranking, leakage, drift, contracts, parity, preprocess, timeseries, experiments, explog, latency, report_lint, results_io, splitgap, selection, mode, deliverables.
 
+## Why This Skill?
+
+Common failure modes in AI-generated ML work, and what this skill enforces:
+
+| Common failure | What the skill does |
+| :--- | :--- |
+| Scalers/encoders fit on the full dataset before splitting | Guardrails push fitting inside a `Pipeline`, on `X_train` only |
+| Test score reported without checking the CV vs holdout gap | Selection-gap check flags large gaps |
+| Metrics typed by hand into reports | `results.json` is written only by `write_results`; hand edits are detected, and `lint_report.py` flags untraceable numbers |
+| Notebook delivered with no baseline or experiment log | `check_deliverables.py` blocks "done" until these exist |
+
+### A Concrete Example: The Preprocessing Leakage Trap
+
+**Scenario:** We gave an agent a dataset with numerical features and asked it to build a baseline classifier.
+
+* **Without the skill:** The agent immediately called `StandardScaler().fit_transform(X)` before `train_test_split`. The test set distribution leaked directly into the training scaling parameters, producing an overly optimistic ROC-AUC that degraded on unseen real-world data.
+* **With the skill:** The skill's protocol strictly rejected fitting transformations outside a pipeline. The agent encapsulated preprocessing inside a `scikit-learn` `Pipeline`, fitted solely on `X_train`, and `check_deliverables.py` verified the pipeline artifact before final logging.
+
+
+
 ## Install the skill
 
 Copy or link this folder into your agent's skills directory:
