@@ -1,0 +1,11 @@
+{
+  "_readme": "Configuration constants: the single source of truth. The pipeline reads them; the report linter accepts them as quotable numbers. Never put measured results here, and never edit results.json by hand.",
+  "seed": 42,
+  "test_size": 0.2,
+  "cv_folds": 5,
+  "confidence_level": 0.95,
+  "bootstrap_resamples": 10000,
+  "selection_alpha": 0.05,
+  "accuracy_bands": [0.1, 0.2],
+  "domain_bounds": {}
+}
