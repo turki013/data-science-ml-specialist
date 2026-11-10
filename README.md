@@ -66,25 +66,31 @@ data-science-ml-specialist/
 
 **`scripts/dstk/` helpers:** stats, ranking, leakage, drift, contracts, parity, preprocess, timeseries, experiments, explog, latency, report_lint, results_io, splitgap, selection, mode, deliverables.
 
-## Why This Skill?
+## 📊 Empirical Benchmark: Vanilla Coding Agent vs. Agent + Skill
 
-Common failure modes in AI-generated ML work, and what this skill enforces:
+We benchmarked an end-to-end customer churn classification task on tabular data containing repeated entity records (`customer_id`), missing numeric values (`age`, `monthly_spend`), and 1,200 rows. The goal was to observe behavioral differences between an unguided coding agent and an agent enforced by `data-science-ml-specialist` in Senior Mode.
 
-| Common failure | What the skill does |
-| :--- | :--- |
-| Scalers/encoders fit on the full dataset before splitting | Guardrails push fitting inside a `Pipeline`, on `X_train` only |
-| Test score reported without checking the CV vs holdout gap | Selection-gap check flags large gaps |
-| Metrics typed by hand into reports | `results.json` is written only by `write_results`; hand edits are detected, and `lint_report.py` flags untraceable numbers |
-| Notebook delivered with no baseline or experiment log | `check_deliverables.py` blocks "done" until these exist |
+| Dimension | Vanilla Coding Agent | Agent + `data-science-ml-specialist` |
+|---|---|---|
+| **Pipeline Architecture** | Single ad-hoc script with hardcoded local paths | Encapsulated `ColumnTransformer` + production-grade pipeline directory structure |
+| **Baseline Ladder** | Single model execution | Formal ladder (Dummy 0.5000 → Logistic Regression 0.6734 → Default LightGBM 0.6146 → Regularized LightGBM 0.6658) |
+| **Statistical Rigor** | Mean/std printout only | 95% Bootstrap CIs + Wilcoxon paired difference test vs baselines |
+| **Slice & Bias Analysis** | Omitted | Explicit demographic & behavior subgroup evaluation (age > 50, low spend, tenure segments) |
+| **Results Authenticity** | Unverified console stdout (`print`) | Machine-verifiable `results.json` + canonical SHA-256 literal hash tracking |
+| **Verification & Tests** | 0 tests run | 161 automated pytest test suites passed + AST report linter passed |
+| **Deliverables & Audits** | 1 standalone Python file | 4 production markdown reports (Brief, Audit, Card, Final Report) + serialized joblib artifact |
 
-### A Concrete Example: The Preprocessing Leakage Trap
+### Visual Proof
 
-**Scenario:** We gave an agent a dataset with numerical features and asked it to build a baseline classifier.
+#### ❌ Vanilla Agent: Ad-hoc Script (Console stdout, zero tests, hardcoded paths)
 
-* **Without the skill:** The agent immediately called `StandardScaler().fit_transform(X)` before `train_test_split`. The test set distribution leaked directly into the training scaling parameters, producing an overly optimistic ROC-AUC that degraded on unseen real-world data.
-* **With the skill:** The skill's protocol strictly rejected fitting transformations outside a pipeline. The agent encapsulated preprocessing inside a `scikit-learn` `Pipeline`, fitted solely on `X_train`, and `check_deliverables.py` verified the pipeline artifact before final logging.
+![Vanilla Agent benchmark](assets/without_skill.png)
 
+#### ✅ Agent + data-science-ml-specialist: Production Lifecycle (161 tests passed, results provenance, full audit)
 
+![Agent + skill benchmark](assets/with_Skill.png)
+
+> **Key engineering takeaway:** Vanilla coding agents can generate plausible code that leaks distributions and skips statistical verification; equipping the agent with this skill enforces test-driven machine learning engineering with behavioral guarantees.
 
 ## Install the skill
 
