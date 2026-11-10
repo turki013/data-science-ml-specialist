@@ -124,8 +124,8 @@ cp -r . ~/.opencode/skills/data-science-ml-specialist
 ```
 Windows (PowerShell):
 ```bash
-mkdir -p ~/.opencode/skills
-cp -r . ~/.opencode/skills/data-science-ml-specialist
+New-Item -ItemType Directory -Force -Path "$HOME\.opencode\skills"
+Copy-Item -Recurse -Force . "$HOME\.opencode\skills\data-science-ml-specialist"
 ```
 
 # Antigravity
