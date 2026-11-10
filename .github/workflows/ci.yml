@@ -19,7 +19,8 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pytest scikit-learn numpy lightgbm
+          pip install pytest scikit-learn numpy lightgbm pandas
+
       - name: Run tests
         run: |
           pytest
