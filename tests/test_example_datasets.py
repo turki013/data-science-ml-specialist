@@ -32,3 +32,15 @@ def test_dataset_is_small_enough_to_ship(name):
 
 def test_every_dataset_is_reachable_from_the_documented_generator():
     assert set(generate.BUILDERS) == {p.name for p in DATA.glob("*.csv")} - {"frozen_test.csv"}
+
+
+def test_fixture_set_is_frozen_at_five():
+    """Scope decision (2025-11): five fixtures are enough, and repo size is part of the product.
+
+    A sixth dataset needs an issue arguing which guard the existing five cannot demonstrate, so this
+    test fails loudly instead of letting the repo grow one plausible CSV at a time. Raise the number
+    here and in CONTRIBUTING.md in the same reviewed commit."""
+    assert len(generate.BUILDERS) == 5, (
+        f"the fixture set is meant to stay at 5, found {len(generate.BUILDERS)}: "
+        f"{sorted(generate.BUILDERS)}. See CONTRIBUTING.md, 'Dataset scope'.")
+    assert sum((DATA / n).stat().st_size for n in generate.BUILDERS) < 500_000

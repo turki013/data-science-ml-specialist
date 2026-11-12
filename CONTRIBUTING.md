@@ -18,6 +18,19 @@ Any contribution must strictly adhere to the core philosophy of this skill:
 ### 2. Suggesting Enhancements or New Rules
 - Open an issue describing the specific ML pipeline flaw, leak vector, or benchmark standard you want to address.
 
+### Dataset scope (decided 2025-11)
+
+The fixture set is **closed at five datasets** (`examples/data/`, documented in `references/datasets.md`):
+`churn_leaky`, `sales_daily`, `listings_ar`, `experiment_ab`, `interactions`. They cover the pathologies this
+skill is about, and keeping the repo small is a feature — a clone is a skill install, not a data download.
+
+New fixtures will be declined by default. If you believe one is genuinely missing, open an issue **first** and
+argue what guard it demonstrates that the existing five cannot. Improving `references/playbooks.md`,
+`references/stats-recipes.md` or the helpers in `scripts/dstk/` is always welcome and needs no such argument.
+
+`tests/test_example_datasets.py::test_fixture_set_is_frozen_at_five` enforces this count; changing it is a
+deliberate, reviewed decision, not an accident.
+
 ### 3. Submitting Pull Requests (PRs)
 1. Fork the repository and create a feature branch (`git checkout -b feature/your-feature-name`).
 2. Make modifications to `SKILL.md` or scripts under `scripts/`.

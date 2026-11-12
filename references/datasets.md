@@ -13,6 +13,11 @@ Why synthetic and not scraped data:
 
 They are fixtures, **not a benchmark**. Never quote a model score from them as a result.
 
+**The set is closed at five.** They cover the pathologies this skill is about, and repo size is part of the
+product: a clone is a skill install, not a data download. A sixth dataset needs an issue arguing which guard the
+existing five cannot demonstrate (`tests/test_example_datasets.py::test_fixture_set_is_frozen_at_five` enforces
+the count). Improvements belong in `references/playbooks.md`, `references/stats-recipes.md` or `scripts/dstk/`.
+
 | File | Rows | Grain | Target | Planted pathology | Guard that must fire | Test |
 |---|---|---|---|---|---|---|
 | `churn_leaky.csv` | 1,793 | customer-month | `churned` | two post-outcome columns (`support_calls_after_cancel`, `cancelled_at`); repeated `customer_id`; missing `monthly_spend` | `single_feature_auc_scan`, `assert_no_group_overlap`, contract gate | `tests/test_example_churn.py` |
