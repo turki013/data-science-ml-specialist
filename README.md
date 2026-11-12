@@ -1,4 +1,4 @@
-<p align="center">
+﻿<p align="center">
   <img src="assets/logo.svg" alt="data-science-ml-specialist logo" width="80" height="80">
 </p>
 
@@ -51,7 +51,7 @@ and produce the reports/ folder.
 ```text
 data-science-ml-specialist/
 ├── SKILL.md                 # the skill: modes, guardrails, anti-hype rules, Senior playbook
-├── references/              # playbooks, statistical recipes, templates, data contracts, deployment checklist
+├── references/              # playbooks, helper index, fixtures, templates, contracts, deployment checklist
 ├── scripts/
 │   ├── dstk/                # tested helpers (see below)
 │   ├── lint_report.py       # hype / unverified-number / results-integrity linter
@@ -59,12 +59,33 @@ data-science-ml-specialist/
 │   └── check_deliverables.py# Senior-mode gate before declaring a project done
 ├── assets/report_templates/ # report templates
 ├── tests/                   # pytest suite (leakage, parity, frozen-set regression, serving, ...)
-├── examples/                # example hooks and data
+├── examples/
+│   ├── data/                # 5 synthetic fixtures: churn, sales, Arabic listings, A/B, ranking
+│   ├── make_datasets.py     # deterministic generator (--check fails on any drift)
+│   ├── project_hooks_example.py
+│   └── serving_app_example.py
 ├── pytest.ini
 └── requirements-dev.txt
 ```
 
 **`scripts/dstk/` helpers:** stats, ranking, leakage, drift, contracts, parity, preprocess, timeseries, experiments, explog, latency, report_lint, results_io, splitgap, selection, mode, deliverables.
+
+## Bundled example datasets
+
+Five small synthetic fixtures ship with the repo, each built to contain one specific pathology, each with a
+test that proves the matching guard fires on the file:
+
+| Fixture | Rows | What is wrong with it on purpose |
+|---|---|---|
+| `churn_leaky.csv` | 1,793 | two post-outcome columns (AUC 0.98 and 1.00) and repeated customers |
+| `sales_daily.csv` | 731 | a time series a random split will happily destroy |
+| `listings_ar.csv` | 200 | Arabic re-listings: same property, different digits, punctuation and price |
+| `experiment_ab.csv` | 4,000 | a real +2.2pp lift, and a guardrail that moves the wrong way |
+| `interactions.csv` | 3,272 | implicit feedback where popularity is *worse* than random |
+
+`python examples/make_datasets.py --check` proves the committed CSVs still match the generator;
+`pytest tests/test_example_*.py` runs the guards on them. Details and the senior lesson behind each
+fixture: [references/datasets.md](references/datasets.md). They are test fixtures, not a benchmark.
 
 ## 📊 Empirical Benchmark: Vanilla Coding Agent vs. Agent + Skill
 
@@ -77,7 +98,7 @@ We benchmarked an end-to-end customer churn classification task on tabular data 
 | **Statistical Rigor** | Mean/std printout only | 95% Bootstrap CIs + Wilcoxon paired difference test vs baselines |
 | **Slice & Bias Analysis** | Omitted | Explicit demographic & behavior subgroup evaluation (age > 50, low spend, tenure segments) |
 | **Results Authenticity** | Unverified console stdout (`print`) | Machine-verifiable `results.json` + canonical SHA-256 literal hash tracking |
-| **Verification & Tests** | 0 tests run | This repo's suite: **149 passed, 2 skipped, 0 failed** (Python 3.14 / Windows; CI runs the same suite on 3.11 / Ubuntu) + report linter on every report |
+| **Verification & Tests** | 0 tests run | This repo's suite: **206 passed, 2 skipped, 0 failed** (Python 3.14 / Windows; CI runs the same suite on 3.11 / Ubuntu) + report linter on every report |
 | **Deliverables & Audits** | 1 standalone Python file | 4 production markdown reports (Brief, Audit, Card, Final Report) + serialized joblib artifact |
 
 ### Scope of this comparison (read before quoting it)
@@ -221,8 +242,9 @@ Lint my README for unverified numbers.
 
 ## Tested on
 
-- A synthetic churn dataset with planted leakage
-- A synthetic time-series sales dataset
+- The five bundled fixtures (`examples/data/`, see [references/datasets.md](references/datasets.md)): planted
+  leakage, a time-ordered series, Arabic near-duplicate listings, a guarded A/B test, implicit-feedback ranking
+- A synthetic housing task used as the hook contract for the pytest suite
 - A real project: Riyadh house-price prediction with a train/test overfitting investigation
 
 No benchmark scores are claimed for the bundled example project: it is a test fixture, not a benchmark.
