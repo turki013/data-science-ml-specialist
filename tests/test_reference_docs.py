@@ -1,15 +1,19 @@
 """Guard the reference docs the way the code is guarded.
 
-Three rules, all of which used to be unenforced prose:
+Four rules, all of which used to be unenforced prose:
 
 1. Every `## ` section in `references/playbooks.md` declares a status (`tested`, `partly`, `prose-only`,
    `out-of-scope`). A section without one is a section nobody has decided about.
-2. `playbooks.md` carries no implementations: no `def`/`class`. Code lives in `scripts/dstk/` and
-   `examples/playbook_snippets.py`, readable copies in `references/stats-recipes.md`. Keeping a third copy in the
-   playbook is how the three silently drift apart (the reason this test exists).
-3. Every repo path named in the docs exists. Renaming a module or a test must fail here, not in a reader's face
-   six months later.
+2. The reference docs carry no implementations: no `def`/`class`. Code lives in `scripts/dstk/` and
+   `examples/playbook_snippets.py`. A third copy is how the three silently drift apart — the reason
+   `references/stats-recipes.md` was rewritten as an index, and the reason this test exists.
+3. Every repo path named in the docs exists, every `module.py::symbol` resolves, and every quoted
+   `test_...` name is real. Renaming a helper must fail here, not for a reader six months later.
+4. The index is complete: every public helper and class in `scripts/dstk/` is named somewhere in the
+   reference docs, and the files stay small enough to be worth loading into a context window.
 """
+import importlib
+import inspect
 import re
 from pathlib import Path
 
@@ -18,14 +22,43 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 DOCS = [ROOT / "SKILL.md", ROOT / "README.md", *sorted((ROOT / "references").glob("*.md"))]
 PLAYBOOKS = ROOT / "references" / "playbooks.md"
+RECIPES = ROOT / "references" / "stats-recipes.md"
+CODE_DOCS = [PLAYBOOKS, RECIPES]
 
 STATUSES = {"tested", "partly", "prose-only", "out-of-scope"}
+DSTK = ROOT / "scripts" / "dstk"
+MODULES = sorted(p.stem for p in DSTK.glob("*.py") if p.stem != "__init__")
+
 PATH_RE = re.compile(r"(?<![\w/])((?:scripts|tests|examples|references|assets)/[\w./-]+\.(?:py|md|csv|json|ini|txt))")
 SECTION_RE = re.compile(r"^## (?!#)(.+)$", re.M)
+# scripts/dstk/stats.py::bootstrap_ci, tests/test_x.py::test_y, or the compact stats.py::bootstrap_ci
+SYMBOL_RE = re.compile(r"`((?:(?:scripts|tests|examples)/[\w./-]+|[\w-]+)\.py)::(\w+)(?:\(\))?"
+                       r"(?:\s|`)")
+
+
+def _symbol_path(rel: str) -> Path:
+    """Resolve a `module.py` token: bare names mean a dstk module, path-shaped names are relative to the root."""
+    return ROOT / rel if "/" in rel else DSTK / rel
 
 
 def _docs():
     return [(p, p.read_text(encoding="utf-8")) for p in DOCS if p.exists()]
+
+
+def _code_docs():
+    return [(p, p.read_text(encoding="utf-8")) for p in CODE_DOCS]
+
+
+def _public_symbols():
+    out = []
+    for name in MODULES:
+        mod = importlib.import_module(f"dstk.{name}")
+        for sym, obj in inspect.getmembers(mod):
+            if sym.startswith("_") or getattr(obj, "__module__", None) != mod.__name__:
+                continue
+            if inspect.isfunction(obj) or inspect.isclass(obj):
+                out.append((name, sym))
+    return out
 
 
 def test_every_playbook_section_declares_a_status():
@@ -46,11 +79,11 @@ def test_every_playbook_section_declares_a_status():
     assert not problems, "playbooks.md:\n-" + "\n- ".join(problems)
 
 
-def test_playbook_carries_no_implementations():
-    text = PLAYBOOKS.read_text(encoding="utf-8")
-    offenders = [ln for ln in text.splitlines() if re.match(r"^\s*(def|class)\s+\w", ln)]
+@pytest.mark.parametrize("doc", CODE_DOCS, ids=lambda p: p.name)
+def test_reference_docs_carry_no_implementations(doc):
+    offenders = [ln for ln in doc.read_text(encoding="utf-8").splitlines() if re.match(r"^\s*(def|class)\s+\w", ln)]
     assert not offenders, (
-        "playbooks.md must not define functions/classes: keep implementations in scripts/dstk/ or "
+        f"{doc.name} must not define functions/classes: keep implementations in scripts/dstk/ or "
         f"examples/playbook_snippets.py and point at them. Found: {offenders[:3]}")
 
 
@@ -75,18 +108,18 @@ def test_every_playbook_section_points_at_something_real():
     assert not problems, "playbooks.md:\n-" + "\n- ".join(problems)
 
 
-SYMBOL_RE = re.compile(r"`((?:scripts|tests|examples)/[\w./-]+\.py)::(\w+)(?:\(\))?`")
-TEST_NAME_RE = re.compile(r"`(test_\w+)`")
-
-
 def test_named_code_symbols_exist():
     """`module.py::function` in the docs must resolve: a renamed helper fails here, not for a reader."""
     problems = []
     for doc, text in _docs():
         for rel, symbol in SYMBOL_RE.findall(text):
-            src = (ROOT / rel).read_text(encoding="utf-8")
+            path = _symbol_path(rel)
+            if not path.exists():
+                problems.append(f"{doc.name}: {rel} does not exist")
+                continue
+            src = path.read_text(encoding="utf-8")
             if not re.search(rf"^\s*(def|class)\s+{re.escape(symbol)}\b", src, re.M):
-                problems.append(f"{doc.name}: {rel}::{symbol} not found")
+                problems.append(f"{doc.name}: {rel}::{symbol} not found in the module")
     assert not problems, "\n- ".join(problems)
 
 
@@ -97,7 +130,35 @@ def test_named_tests_exist():
         known.update(re.findall(r"^\s*def (test_\w+)", path.read_text(encoding="utf-8"), re.M))
     problems = []
     for doc, text in _docs():
-        for name in set(TEST_NAME_RE.findall(text)):
+        for name in set(re.findall(r"`(test_\w+)`", text)):
             if name not in known:
                 problems.append(f"{doc.name}: test '{name}' does not exist")
     assert not problems, "\n- ".join(problems)
+
+
+def test_every_public_helper_is_indexed():
+    """The index that replaced the code copies must stay complete: 81 public helpers today, and the
+    count only grows on purpose. Add the row when you add the helper."""
+    recipes = RECIPES.read_text(encoding="utf-8")
+    playbooks = PLAYBOOKS.read_text(encoding="utf-8")
+    symbols = _public_symbols()
+    missing = [f"{mod}.py::{sym}" for mod, sym in symbols
+               if f"{mod}.py::{sym}" not in recipes and f"{mod}.{sym}" not in playbooks]
+    assert not missing, (
+        "these public helpers are missing from references/stats-recipes.md "
+        f"(add a row to the matching module table): {missing}")
+    # the number the doc quotes must be the number the code has, or the claim rots silently
+    stated = re.search(r"\*\*every public helper in every module must appear here\*\* \((\d+) of them\)", recipes)
+    assert stated, "stats-recipes.md no longer states how many helpers the index covers"
+    assert int(stated.group(1)) == len(symbols), (
+        f"stats-recipes.md says {stated.group(1)} helpers, the code has {len(symbols)}: update the sentence")
+
+
+@pytest.mark.parametrize("doc,limit", [(RECIPES, 20_000), (PLAYBOOKS, 30_000)], ids=["recipes", "playbooks"])
+def test_reference_doc_stays_small(doc, limit):
+    """These files are loaded into an agent's context. Size is a budget, like the fixture set: raise it
+    deliberately, not by accretion."""
+    size = doc.stat().st_size
+    assert size <= limit, (
+        f"{doc.name} is {size:,} bytes, over the {limit:,}-byte budget. Move detail into modules or tests "
+        f"instead of growing the read path.")

@@ -45,8 +45,8 @@ In Lite mode, when the task looks large or risky (multi-week project, deployment
 ## 0.3 Bundled files (read on demand)
 | File | Use |
 |---|---|
-| `references/playbooks.md` | decisions by problem type: recommenders/ranking, tabular + outliers, text features (thin), forecasting, clustering (prose), anomaly (out of scope), A/B, causal (out of scope), drift. Every section declares `tested`/`partly`/`prose-only`/`out-of-scope` and points at its code, fixture and test; implementations stay in `scripts/dstk/` and `references/stats-recipes.md` |
-| `references/stats-recipes.md` | bootstrap/Wilson intervals, paired tests, leakage checks, ranking metrics, PSI, parity (code) |
+| `references/playbooks.md` | decisions by problem type: recommenders/ranking, tabular + outliers, text features (thin), forecasting, clustering (prose), anomaly (out of scope), A/B, causal (out of scope), drift. Every section declares `tested`/`partly`/`prose-only`/`out-of-scope` and points at its code, fixture and test. No implementations: the code is `scripts/dstk/` |
+| `references/stats-recipes.md` | index of every public `dstk` helper: contract, formula, and what it refuses to do. No code copies — read the module |
 | `references/templates.md` | Project Brief, Data Audit, Experiment Log, Model Card, Final Report, README, PR, wording guide |
 | `references/data-contracts.md` | data quality gate: schema, bounds, duplicates, serving validation |
 | `references/deployment-checklist.md` | pipeline artifact, parity, FastAPI serving, latency, fallbacks, monitoring |

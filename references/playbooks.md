@@ -1,8 +1,8 @@
 # Playbooks by Problem Type
 
 Read only the section you need. This file carries **decisions**; the **code** lives in `scripts/dstk/` and
-`examples/playbook_snippets.py`, and `references/stats-recipes.md` holds readable copies of it. When a copy and a
-`.py` file disagree, the `.py` file wins.
+`examples/playbook_snippets.py`. `references/stats-recipes.md` is an index of those helpers (contract + formula,
+no code copies), so there is exactly one place where the implementation can be wrong.
 
 Every section opens with a status line:
 
@@ -116,8 +116,8 @@ Evaluation when no ground truth exists — say this explicitly in the report:
 | NDCG@k | graded gain with log discount, normalized by the ideal | use when relevance is graded |
 | Coverage | share of catalog appearing in any top-k | diversity of what is recommended |
 
-Decisions that matter more than the formulas (the code is `dstk.ranking`; readable copies and conventions are
-in **`references/stats-recipes.md` §3**, not repeated here):
+Decisions that matter more than the formulas (the code is `dstk.ranking`; contracts and conventions are in
+**`references/stats-recipes.md`**, not repeated here):
 
 - Queries with no relevant items are excluded from recall/MAP/NDCG and reported as `n_skipped` — never zeroed.
 - Compare two recommenders with `dstk.stats.paired_comparison` on **per-query** NDCG, same queries, same k.
@@ -337,7 +337,7 @@ Price-like targets move with the market. Before using an old dataset:
 - Outputs: prediction distribution drift and, when labels arrive, rolling error by slice.
 - Define alert thresholds and a retrain trigger before launch.
 
-The implementation (`psi`, `psi_categorical`, `psi_report`, `ks_report`) is `dstk.drift`; its readable copy and
-the thresholds live in **`references/stats-recipes.md` §4** — this file does not repeat them. Two review notes
+The implementation (`psi`, `psi_categorical`, `psi_report`, `ks_report`) is `dstk.drift`; its contracts and the
+thresholds are indexed in **`references/stats-recipes.md`** — this file does not repeat them. Two review notes
 that belong to the decision, not the code: with tiny samples PSI is noisy, and with huge samples KS p-values are
 significant for trivial shifts, so read the statistic.
