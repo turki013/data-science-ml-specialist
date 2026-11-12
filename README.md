@@ -77,8 +77,18 @@ We benchmarked an end-to-end customer churn classification task on tabular data 
 | **Statistical Rigor** | Mean/std printout only | 95% Bootstrap CIs + Wilcoxon paired difference test vs baselines |
 | **Slice & Bias Analysis** | Omitted | Explicit demographic & behavior subgroup evaluation (age > 50, low spend, tenure segments) |
 | **Results Authenticity** | Unverified console stdout (`print`) | Machine-verifiable `results.json` + canonical SHA-256 literal hash tracking |
-| **Verification & Tests** | 0 tests run | 161 automated pytest test suites passed + AST report linter passed |
+| **Verification & Tests** | 0 tests run | This repo's suite: **149 passed, 2 skipped, 0 failed** (Python 3.14 / Windows; CI runs the same suite on 3.11 / Ubuntu) + report linter on every report |
 | **Deliverables & Audits** | 1 standalone Python file | 4 production markdown reports (Brief, Audit, Card, Final Report) + serialized joblib artifact |
+
+### Scope of this comparison (read before quoting it)
+
+The two rows above come from a run on a **separate churn project that is not part of this repository**; only the terminal captures are kept in `assets/`. The counts in the *Verification & Tests* row are the only numbers here taken from **this** repository, and you can reproduce them:
+
+```bash
+pip install -r requirements-dev.txt && pytest
+```
+
+Everything else in this repo (helpers, tests, reports gate, frozen-set hash) is reproducible from the code. The churn numbers are a demonstration, not a benchmark result.
 
 ### Visual Proof
 
@@ -86,7 +96,7 @@ We benchmarked an end-to-end customer churn classification task on tabular data 
 
 ![Vanilla Agent benchmark](assets/without_skill.png)
 
-#### ✅ Agent + data-science-ml-specialist: Production Lifecycle (161 tests passed, results provenance, full audit)
+#### ✅ Agent + data-science-ml-specialist: Production Lifecycle (results provenance, full audit)
 
 ![Agent + skill benchmark](assets/with_Skill.png)
 
@@ -215,7 +225,9 @@ Lint my README for unverified numbers.
 - A synthetic time-series sales dataset
 - A real project: Riyadh house-price prediction with a train/test overfitting investigation
 
-No benchmark scores are claimed here. Run the test suite and the example project yourself.
+No benchmark scores are claimed for the bundled example project: it is a test fixture, not a benchmark.
+The churn comparison above was run in a separate project that is not part of this repository, and only
+its terminal captures are included. Run `pytest` here and the example project yourself.
 
 ## Contributing
 
