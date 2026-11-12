@@ -25,8 +25,13 @@ class QuantileWinsorizer(BaseEstimator, TransformerMixin):
 
     def transform(self, X):
         df = pd.DataFrame(X)
-        arr = df.to_numpy(dtype=float)
-        return np.clip(arr, self.lo_, self.hi_)
+        try:
+            df = df[list(self.columns_)]
+        except KeyError as exc:
+            raise KeyError(f"QuantileWinsorizer was fitted on {list(self.columns_)}, "
+                           f"got {list(pd.DataFrame(X).columns)}") from exc
+        arr = np.clip(df.to_numpy(dtype=float), self.lo_, self.hi_)
+        return pd.DataFrame(arr, columns=list(self.columns_), index=df.index)
 
     def get_feature_names_out(self, input_features=None):
         return np.asarray(self.columns_, dtype=object)

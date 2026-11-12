@@ -27,6 +27,15 @@ def test_code_blocks_and_inline_code_are_ignored():
     assert RL.find_unverified_numbers(txt, []) == []
 
 
+def test_quoted_words_are_mentions_not_claims():
+    txt = ('A README that says "state-of-the-art" with no evidence is exactly what this skill fixes.\n'
+           'The reviewer called the model "perfect".')
+    assert RL.find_hype(txt) == []                       # quoted = mentioned, not claimed
+    assert {h["word"] for h in RL.find_hype("This model is perfect.")} == {"perfect"}
+    assert RL.find_hype("لا تكتب «مثالي» في التقرير") == []   # Arabic guillemets
+    assert {h["word"] for h in RL.find_hype("هذا النموذج مثالي")} == {"مثالي"}
+
+
 def test_numbers_matching_results_pass_including_rounding_and_percent_forms():
     txt = ("Holdout MAPE was 13.25%, R2 0.81 on 5,789 training rows. "
            "Within ±15%: 37.8% of 45 listings. Gap 4.6%.")

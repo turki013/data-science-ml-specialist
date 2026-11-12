@@ -2,9 +2,10 @@ import numpy as np
 import pandas as pd
 import pytest
 
-import playbook_snippets as pb
-from dstk import ranking as R
-from dstk import explog, latency
+pb = pytest.importorskip("playbook_snippets",
+                         reason="examples/ is not installed: copy it next to tests/ to run the snippet tests")
+from dstk import ranking as R  # noqa: E402
+from dstk import explog, latency  # noqa: E402
 
 
 def test_normalize_arabic_unifies_forms_and_digits():

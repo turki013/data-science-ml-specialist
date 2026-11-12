@@ -1,4 +1,4 @@
-"""Inference-service tests (skipped automatically when fastapi/httpx are not installed)."""
+"""Inference-service tests (skipped automatically when fastapi/httpx or examples/ are not installed)."""
 import time
 
 import numpy as np
@@ -9,7 +9,9 @@ pytest.importorskip("fastapi")
 pytest.importorskip("httpx")
 from fastapi.testclient import TestClient  # noqa: E402
 
-from serving_app_example import create_app  # noqa: E402
+create_app = pytest.importorskip(
+    "serving_app_example",
+    reason="examples/ is not installed: copy it next to tests/ to run the serving tests").create_app
 
 SCHEMA = {"columns": {
     "size": {"dtype": "number", "nullable": False, "min": 20, "max": 5000},
