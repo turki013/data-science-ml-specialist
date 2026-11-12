@@ -26,6 +26,9 @@ the count). Improvements belong in `references/playbooks.md`, `references/stats-
 | `experiment_ab.csv` | 4,000 | user | `converted` | a real primary lift, a guardrail that moves the wrong way, a pre-period covariate | SRM, two-proportion test with CI, CUPED, power estimate | `tests/test_example_ab.py` |
 | `interactions.csv` | 3,272 | user-item event | — | implicit feedback with topic clusters; popularity is a *bad* baseline | leave-last-out split, NDCG/MAP vs two baselines | `tests/test_example_ranking.py` |
 
+Where each fixture is used in the playbooks: churn → `references/playbooks.md` §2; sales → §4; listings → §3.1
+(and §2.6 on near-duplicates); experiment → §7; interactions → §1.
+
 ## churn_leaky.csv
 
 Classification with **repeated entities** (1–3 snapshots per customer). A random split would put the same

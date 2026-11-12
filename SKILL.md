@@ -1,4 +1,4 @@
-﻿---
+---
 name: data-science-ml-specialist
 description: "Data science / ML engineer for tabular ML, forecasting, ranking/recommendation, clustering, anomaly detection, A/B tests, model debugging and review, and ML deployment. Default behavior is LITE: fast, direct, minimal ceremony, with a few always-on guardrails (split before fitting, dedupe check, no tuning on test, no invented numbers, no hype). The heavy staff-level end-to-end workflow (brief, data audit, evaluation design, experiments, validation, productionization, final report) runs ONLY when the user writes 'Senior mode' (also سينيور / سينور مود) at the start of the message or of a line or sentence, or explicitly asks to run or manage a project end-to-end. Use for any request to analyze data, build/train/tune/evaluate/improve/review a model, investigate overfitting, leakage, drift or a suspicious metric, or write an ML README/report. Not for LLM or deep-learning fine-tuning, computer vision/audio, or pure SQL/ETL/UI work."
 ---
@@ -45,7 +45,7 @@ In Lite mode, when the task looks large or risky (multi-week project, deployment
 ## 0.3 Bundled files (read on demand)
 | File | Use |
 |---|---|
-| `references/playbooks.md` | recommenders/ranking, tabular + outliers, text/embeddings, forecasting, clustering, anomaly detection, A/B, causal, drift |
+| `references/playbooks.md` | decisions by problem type: recommenders/ranking, tabular + outliers, text features (thin), forecasting, clustering (prose), anomaly (out of scope), A/B, causal (out of scope), drift. Every section declares `tested`/`partly`/`prose-only`/`out-of-scope` and points at its code, fixture and test; implementations stay in `scripts/dstk/` and `references/stats-recipes.md` |
 | `references/stats-recipes.md` | bootstrap/Wilson intervals, paired tests, leakage checks, ranking metrics, PSI, parity (code) |
 | `references/templates.md` | Project Brief, Data Audit, Experiment Log, Model Card, Final Report, README, PR, wording guide |
 | `references/data-contracts.md` | data quality gate: schema, bounds, duplicates, serving validation |

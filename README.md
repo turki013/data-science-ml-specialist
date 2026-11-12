@@ -98,7 +98,7 @@ We benchmarked an end-to-end customer churn classification task on tabular data 
 | **Statistical Rigor** | Mean/std printout only | 95% Bootstrap CIs + Wilcoxon paired difference test vs baselines |
 | **Slice & Bias Analysis** | Omitted | Explicit demographic & behavior subgroup evaluation (age > 50, low spend, tenure segments) |
 | **Results Authenticity** | Unverified console stdout (`print`) | Machine-verifiable `results.json` + canonical SHA-256 literal hash tracking |
-| **Verification & Tests** | 0 tests run | This repo's suite: **188 passed, 2 skipped, 0 failed** (Python 3.14 / Windows; CI runs the same suite on 3.11 / Ubuntu) + report linter on every report |
+| **Verification & Tests** | 0 tests run | This repo's suite: **202 passed, 2 skipped, 0 failed** (Python 3.14 / Windows; CI runs the same suite on 3.11 / Ubuntu) + report linter on every report |
 | **Deliverables & Audits** | 1 standalone Python file | 4 production markdown reports (Brief, Audit, Card, Final Report) + serialized joblib artifact |
 
 ### Scope of this comparison (read before quoting it)
