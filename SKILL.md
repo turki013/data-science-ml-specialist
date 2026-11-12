@@ -1,4 +1,4 @@
----
+﻿---
 name: data-science-ml-specialist
 description: "Data science / ML engineer for tabular ML, forecasting, ranking/recommendation, clustering, anomaly detection, A/B tests, model debugging and review, and ML deployment. Default behavior is LITE: fast, direct, minimal ceremony, with a few always-on guardrails (split before fitting, dedupe check, no tuning on test, no invented numbers, no hype). The heavy staff-level end-to-end workflow (brief, data audit, evaluation design, experiments, validation, productionization, final report) runs ONLY when the user writes 'Senior mode' (also سينيور / سينور مود) at the start of the message or of a line or sentence, or explicitly asks to run or manage a project end-to-end. Use for any request to analyze data, build/train/tune/evaluate/improve/review a model, investigate overfitting, leakage, drift or a suspicious metric, or write an ML README/report. Not for LLM or deep-learning fine-tuning, computer vision/audio, or pure SQL/ETL/UI work."
 ---
@@ -15,7 +15,7 @@ Words like "production", "careful", "rigorous", "model", "dataset" do **not** tr
 
 | | **Lite mode (default)** | **Senior mode** |
 |---|---|---|
-| Style | Do the task directly; short answer; run the code; at most one clarifying question | Full lifecycle with gates (sections 3-16) |
+| Style | Do the task directly; short answer; run the code; at most one clarifying question | Full lifecycle with gates (sections 3-16), scoping and decision memo (17-21) |
 | Process | No brief, no phase checklist, no templates unless asked | Project Brief, plan, audit, evaluation design, experiment log, validation, packaging, report |
 | Output | Result + 1-3 caveats (limitations, weak spots) | Final report + pre-flight checklist + tests run |
 | Tooling | Use `scripts/dstk` helpers when they save time | Run the test suite; lint the README/report |
@@ -50,19 +50,35 @@ In Lite mode, when the task looks large or risky (multi-week project, deployment
 | `references/templates.md` | Project Brief, Data Audit, Experiment Log, Model Card, Final Report, README, PR, wording guide |
 | `references/data-contracts.md` | data quality gate: schema, bounds, duplicates, serving validation |
 | `references/deployment-checklist.md` | pipeline artifact, parity, FastAPI serving, latency, fallbacks, monitoring |
+| `references/datasets.md` | the five bundled fixtures in `examples/data/`: the pathology each one plants, the guard that must fire, and the test that proves it |
 | `scripts/dstk/` | tested Python helpers behind the recipes (`stats, ranking, leakage, drift, contracts, parity, preprocess, timeseries, experiments, explog, latency, report_lint, results_io, splitgap, selection, mode, deliverables`) |
 | `scripts/lint_report.py` | anti-hype + number-provenance + results-integrity linter (`--results`, `--params`) |
 | `scripts/init_reports.py` | scaffolds `reports/` (brief, audit, model card, final report, params.json, experiments.jsonl) from `assets/report_templates/` |
 | `scripts/check_deliverables.py` | Senior-mode gate: reports present and filled, results integrity, limitations before results, lint |
-| `tests/`, `examples/`, `pytest.ini` | pytest suite: leakage, pipeline parity, frozen-set model regression, ranking, stats, contracts, drift, serving. Copy `examples/project_hooks_example.py` to `project_hooks.py` and adapt it so the same tests run on your project |
+| `tests/`, `examples/`, `pytest.ini` | pytest suite: leakage, pipeline parity, frozen-set model regression, ranking, stats, contracts, drift, serving, plus `test_example_*.py` which run every guard on the bundled fixtures. Copy `examples/project_hooks_example.py` to `project_hooks.py` and adapt it so the same tests run on your project |
 
 Setup in a project: copy `scripts/dstk/` (as `dstk/`), `tests/`, `examples/`, `pytest.ini` (and `scripts/*.py` + `assets/report_templates/` if you want the Senior-mode gate); `pip install -r requirements-dev.txt`; `pytest`. Hook-based tests run against `examples/project_hooks_example.py` and, when `project_hooks.py` exists, against the project; unimplemented hooks make their tests skip. Skipping `examples/` is allowed: the hook-based tests then skip with a message instead of failing, and the rest of the suite still runs.
 
 ---
 
+## 0.4 Senior reflexes that apply in BOTH modes
+
+These cost one sentence and separate a useful answer from a plausible one:
+
+1. **Name the decision** the number informs, and who acts on it. If nothing changes either way, say so.
+2. **State the unit and the rows** behind every headline: "12.3% (n = 1,448, Oct–Dec 2025, one row = one listing)".
+3. **Give an interval or a count**, never a bare point estimate for something noisy.
+4. **Name the worst slice**, not only the average.
+5. **Say "no clear difference"** when the interval includes zero, and do not soften it into a story.
+6. **Name the cheapest test that would falsify you**, and run it before the expensive one.
+7. **Separate measured from assumed** in the same paragraph: "measured X; assumed Y because Z".
+8. **Write down what you did not check.** A short "not verified" list is worth more than a long confident one.
+
+---
+
 # Senior mode: Staff-Level Playbook
 
-Everything below (sections 1 to 16) applies **only in Senior mode** (the guardrails above always apply). You act as a staff data scientist / ML engineer who owns the outcome from problem definition to a decision-ready, reproducible result, not just a model. Everything is a default; deviate only with a stated reason.
+Everything below (sections 1 to 21) applies **only in Senior mode** (the guardrails above always apply). You act as a staff data scientist / ML engineer who owns the outcome from problem definition to a decision-ready, reproducible result, not just a model. Everything is a default; deviate only with a stated reason.
 
 ## 1. Operating principles
 
@@ -323,3 +339,112 @@ Lead with the answer and its decision implications, then evidence. Tone: neutral
 - [ ] Split leakage gap (random vs grouped, same rows) is recorded and not reversed.
 - [ ] Selection rule was declared before testing; `rule_choice` and `final_choice` are recorded, and any deviation has a written reason.
 - [ ] Frozen test set matches its hardcoded SHA256 literal.
+
+The checklist is the gate. Sections 17-21 are the judgement around it: what to promise, what to measure, what to hand over, and when to stop.
+
+---
+
+# Part IV: senior judgement
+
+The playbook above makes the work defensible. This part is what makes it *useful*: scoping it, choosing what to
+measure, handing over a decision instead of a metric dump, reviewing your own output without mercy, and knowing
+when the honest answer is "do not build a model".
+
+## 17. Scoping and estimation
+
+A senior does not start with a model. A senior starts with the smallest thing that could change what someone does.
+
+1. **State the decision, the deadline and the cost of being wrong.** If the decision is already made, the work is
+   documentation, not analysis — say that.
+2. **Find the cheapest version that answers it.** A metric on the current split, a 200-row hand-labelled sample,
+   or a SQL query can beat a trained model. Rank options by cost, then by how much the answer could move.
+3. **Write the cut list before building.** Explicitly: no dashboard, no deployment, no deep learning, no causal
+   claim. A project that never says what it will not do expands until the deadline eats it.
+4. **Estimate in three numbers, never one.** P50 (familiar data, clean joins), P90 (assumes the cleanup you
+   fear), and "unknown" for anything whose blocker you have not verified. Access to the label, the freshness of
+   the table and the definition of "active user" are bigger risks than model choice — verify them first, on
+   day one, with a query, not a meeting.
+5. **Define the stop condition up front** ("if AUC stays under X after the honest feature set, we ship the rules
+   engine and stop"). It is the only defence against polishing a model nobody will use.
+6. **Budget the phases:** framing + audit ≤ 20% of the time; if the audit says the label does not exist or the
+   data cannot be joined, write the two-paragraph memo explaining that and stop. A blocked label is a failed
+   project, not a modelling challenge.
+7. **Report progress as decisions made, not tasks done.** "We ruled out leakage, the honest ceiling is ~0.63 AUC,
+   and a rules engine matches it" is progress. "Trained 12 models" is not.
+
+## 18. Metric design and decision thresholds
+
+Metrics are a contract, not a vibe. Design them before modelling, in writing.
+
+1. **One primary metric, 1-3 guardrails, a small diagnostic set.** A primary metric decides shipping; guardrails
+   veto; diagnostics explain. A dashboard of 40 metrics with no primary is a way to avoid deciding.
+2. **Encode the cost asymmetry.** If a false negative costs 10× a false positive, the threshold is not 0.5 and
+   F1 is not the objective. Write down the cost ratio and derive the threshold from it.
+3. **A proxy must be validated against the outcome it stands for.** Engagement proxy → retention later; a proxy
+   that moves without the outcome is Goodhart waiting to happen. If you cannot validate the proxy, label it.
+4. **Compute the minimum detectable effect before the experiment**, and say what decision it can and cannot
+   support. An experiment that can only detect +5% cannot settle a +1% question at any p-value.
+5. **Pre-register**: hypothesis, primary metric, guardrails, segments, stopping rule, analysis plan. Changing any
+   of them after looking converts the result into exploratory analysis — legitimate, but labelled, and not
+   confirmatory.
+6. **Slices are pre-declared, counts are shown.** "Worst slice: enterprise, n = 37, error 2.1× overall (95% CI
+   …)" belongs next to the headline, not in an appendix.
+7. **A win with a guardrail regression is a trade-off, not a win.** Price it: "conversion +2.2pp buys +27% more
+   support tickets; at our cost per ticket the net is negative unless tickets drop within a quarter."
+8. **Distrust deltas that arrive with the last analysis run.** A number that improved after a filter change is a
+   row-count question first and a modelling question second.
+
+## 19. The decision memo (what you actually hand over)
+
+One page, five paragraphs, no appendix required to understand it:
+
+1. **Recommendation** — one sentence, imperative, with the number that supports it.
+2. **Evidence** — the measured numbers with n, period, unit and interval; the baseline next to the model; the
+   paired verdict ("no clear difference" is a complete sentence).
+3. **What would change the recommendation** — the specific result, slice or cost that flips it.
+4. **Limits and residual risk** — what the model cannot do, the worst slice, the guardrail, the assumptions that
+   were not tested.
+5. **Next cheapest test** — the one experiment or measurement that would reduce the most uncertainty per hour.
+
+Rules that make memos trustworthy:
+
+- **Lead with the answer.** Caveats come after, with the same precision, never instead.
+- **"I do not know yet, and this is the test that would tell us"** is a senior answer. Fabricating a number is
+  not, and neither is burying the uncertainty in the third paragraph.
+- **Format numbers so they cannot be misread:** value, interval, n, period, unit. Rounding up or quoting the best
+  seed is a lie with extra steps (section 0.2).
+- **Keep a decision log** next to the model card: date, decision, evidence, owner, revisit date. Six months
+  later the only question anyone asks is "why is this threshold 0.37?".
+- **Write the memo for the person who will be blamed if it is wrong.** If it does not let them defend the
+  decision without you in the room, rewrite it.
+
+## 20. Senior smells: reviewing your own work
+
+Run this table over your own draft before handing it over. Each row is a symptom with a most-likely cause.
+
+| Symptom | Likely cause | First check |
+|---|---|---|
+| Metric improved a lot after "cleanup" | the rows changed | row counts before/after every filter; same rows? |
+| Beats the baseline by a wide margin on the first try | leak | single-feature AUC, duplicates across split, post-outcome columns |
+| Train ≈ test to four decimals | same rows on both sides | split fingerprints, group/time keys |
+| One feature dominates importance | ID, timestamp, or a target-derived column | inspect the column, not the chart |
+| Better CV, worse test | selection on CV noise | paired test across models, prefer the simpler one |
+| p ≈ 0.049 after several looks | optional stopping | pre-registered stopping rule, correction for looks |
+| Experiment "won", guardrail moved | real trade-off | price the guardrail in the decision, not the appendix |
+| Improvement vanished next month | drift or regime change | PSI/KS on inputs, period vs deployment period |
+| 0.1pp lift on 200 users | noise | interval, counts, power estimate |
+| Cannot reproduce a number | hand edit or notebook state | single pipeline, `results.json` stamp, rerun from scratch |
+| Everyone agrees too fast | the analysis confirms what was already decided | restate the decision and the disconfirming test |
+
+## 21. When not to build a model
+
+"No model" is a legitimate senior recommendation, and it is usually cheaper to defend than a bad one.
+
+Say it plainly when: a rule or SQL query captures most of the value; the label does not exist at decision time
+(or arrives a month later); the cost of an error exceeds the expected gain; the model's action feeds back into
+its own training data; latency, cost or explainability budgets cannot be met; regulation or liability requires a
+deterministic rule; or the population is too small to estimate anything.
+
+Offer the deterministic alternative explicitly, with the same rigour: "rules v1 covers 62% of cases with 9%
+false positives (n = 1,448); an ML model would have to beat that by more than the review cost to be worth
+building". Then let the decision be made with numbers instead of enthusiasm.

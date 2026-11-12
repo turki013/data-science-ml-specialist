@@ -1,0 +1,10 @@
+# Text files are stored and checked out with LF everywhere, so the deterministic dataset generator
+# (`python examples/make_datasets.py --check`) and the SHA-256 literals behave the same on Windows,
+# macOS and Linux. Without this, core.autocrlf turns the CSVs into CRLF on checkout and the fixtures
+# stop matching their generator without a single byte of real content changing.
+* text=auto eol=lf
+
+*.png binary
+*.gif binary
+*.jpg binary
+*.svg text eol=lf
