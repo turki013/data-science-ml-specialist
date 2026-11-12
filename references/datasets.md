@@ -23,7 +23,7 @@ the count). Improvements belong in `references/playbooks.md`, `references/stats-
 | `churn_leaky.csv` | 1,793 | customer-month | `churned` | two post-outcome columns (`support_calls_after_cancel`, `cancelled_at`); repeated `customer_id`; missing `monthly_spend` | `single_feature_auc_scan`, `assert_no_group_overlap`, contract gate | `tests/test_example_churn.py` |
 | `sales_daily.csv` | 731 | day | `sales` | a time series that looks like a table | `assert_temporal_order`, expanding-window backtest, MASE vs naive | `tests/test_example_forecast.py` |
 | `listings_ar.csv` | 200 | listing | — | Arabic re-listings: same property, different digits/punctuation/spacing, edited price | `normalize_text` + `text_group_ids` + `row_overlap` | `tests/test_example_listings_ar.py` |
-| `experiment_ab.csv` | 4,000 | user | `converted` | a real primary lift, a guardrail that moves the wrong way, a pre-period covariate | SRM, two-proportion test with CI, CUPED, power estimate | `tests/test_example_ab.py` |
+| `experiment_ab.csv` | 4,000 | user | `converted` | a simulated primary lift, a guardrail that moves the wrong way, a pre-period covariate | SRM, two-proportion test with CI, CUPED, power estimate | `tests/test_example_ab.py` |
 | `interactions.csv` | 3,272 | user-item event | — | implicit feedback with topic clusters; popularity is a *bad* baseline | leave-last-out split, NDCG/MAP vs two baselines | `tests/test_example_ranking.py` |
 
 Where each fixture is used in the playbooks: churn → `references/playbooks.md` §2; sales → §4; listings → §3.1
@@ -67,7 +67,8 @@ means "this property was re-listed" — which is exactly the claim the test make
 
 ## experiment_ab.csv
 
-2,000 users per arm, 50/50, verified by `srm_check`. Conversion 8.05% → 10.30% (+2.25pp, 95% CI
+2,000 users per arm, 50/50, verified by `srm_check`. The treatment effect is **simulated** (generated, not
+measured on users): conversion 8.05% → 10.30% (+2.25pp, 95% CI
 [+0.46pp, +4.04pp], p ≈ 0.014). The interesting parts:
 
 - **`support_tickets` is a guardrail that moves the wrong way** (≈ +27% per user). A review that reports only

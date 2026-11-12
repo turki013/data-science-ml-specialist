@@ -1,4 +1,4 @@
-﻿"""Generate the bundled EXAMPLE datasets used by tests/test_example_*.py.
+"""Generate the bundled EXAMPLE datasets used by tests/test_example_*.py.
 
 Why synthetic: every file here has a pathology planted on purpose (a post-outcome column, a
 re-listed near-duplicate, a broken-free A/B assignment, a weekly seasonality). Real data cannot be
@@ -176,7 +176,7 @@ def listings(seed: int = LISTINGS_SEED) -> pd.DataFrame:
 
 # ------------------------------------------------------------------------------- A/B experiment
 def ab(seed: int = AB_SEED) -> pd.DataFrame:
-    """A clean 50/50 experiment with a real lift on conversion, a correlated pre-period covariate
+    """A clean 50/50 experiment with a SIMULATED treatment effect on conversion, a correlated pre-period covariate
     (for CUPED), and a guardrail metric that moves the wrong way (support tickets).
 
     Pathology: the guardrail, not the primary metric, is the interesting part.
@@ -190,7 +190,7 @@ def ab(seed: int = AB_SEED) -> pd.DataFrame:
     z = (pre_spend - pre_spend.mean()) / pre_spend.std()
 
     p_base = 1 / (1 + np.exp(-(-2.55 + 0.55 * z)))                  # conversion depends on pre_spend
-    p = np.where(is_treat, p_base * 1.30, p_base)                   # ~+2pp absolute lift
+    p = np.where(is_treat, p_base * 1.30, p_base)                   # simulated +2pp treatment effect
     converted = (rng.random(groups.size) < p).astype(int)
 
     # A continuous engagement metric that is strongly correlated with the pre-period covariate:
