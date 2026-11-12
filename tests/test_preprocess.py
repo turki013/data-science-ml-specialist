@@ -14,8 +14,23 @@ def test_winsorizer_learns_bounds_on_train_only_and_keeps_rows():
     w = QuantileWinsorizer(0.05, 0.95).fit(train)
     lo, hi = w.lo_[0], w.hi_[0]
     out = w.transform(test)
-    assert out.shape == (3, 1) and out[0, 0] == lo and out[2, 0] == hi and out[1, 0] == 50.0
+    assert out.shape == (3, 1) and out.iloc[0, 0] == lo and out.iloc[2, 0] == hi and out.iloc[1, 0] == 50.0
     assert w.lo_[0] == lo and w.hi_[0] == hi  # transform must not alter learned bounds
+
+
+def test_winsorizer_keeps_column_names_and_tolerates_reordered_input():
+    train = pd.DataFrame({"a": np.arange(100.0), "b": np.arange(100.0) * 10})
+    w = QuantileWinsorizer(0.05, 0.95).fit(train)
+    out = w.transform(pd.DataFrame({"b": [500.0, -1e6], "a": [1e6, 50.0]}))
+    assert list(out.columns) == ["a", "b"]          # downstream ColumnTransformer relies on names
+    assert out["a"].iloc[0] == w.hi_[0] and out["a"].iloc[1] == 50.0
+    assert out["b"].iloc[0] == 500.0 and out["b"].iloc[1] == w.lo_[1]
+
+
+def test_winsorizer_rejects_columns_it_was_not_fitted_on():
+    w = QuantileWinsorizer().fit(pd.DataFrame({"a": [1.0, 2.0, 3.0]}))
+    with pytest.raises(KeyError):
+        w.transform(pd.DataFrame({"c": [1.0]}))
 
 
 def test_winsorizer_inside_pipeline_cross_validates():

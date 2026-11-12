@@ -13,6 +13,12 @@ import sys
 from datetime import date
 from pathlib import Path
 
+# Project names and report paths can be Arabic; a Windows console defaults to cp1252 and would
+# crash on print(). Force UTF-8 so scaffolding never fails on its own output.
+for _stream in (sys.stdout, sys.stderr):
+    if hasattr(_stream, "reconfigure"):
+        _stream.reconfigure(encoding="utf-8", errors="replace")
+
 ASSETS = Path(__file__).resolve().parent.parent / "assets" / "report_templates"
 
 

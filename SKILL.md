@@ -56,7 +56,7 @@ In Lite mode, when the task looks large or risky (multi-week project, deployment
 | `scripts/check_deliverables.py` | Senior-mode gate: reports present and filled, results integrity, limitations before results, lint |
 | `tests/`, `examples/`, `pytest.ini` | pytest suite: leakage, pipeline parity, frozen-set model regression, ranking, stats, contracts, drift, serving. Copy `examples/project_hooks_example.py` to `project_hooks.py` and adapt it so the same tests run on your project |
 
-Setup in a project: copy `scripts/dstk/` (as `dstk/`), `tests/`, `pytest.ini`; `pip install -r requirements-dev.txt`; `pytest`. Hook-based tests run against the bundled example and, when `project_hooks.py` exists, against the project; unimplemented hooks make their tests skip.
+Setup in a project: copy `scripts/dstk/` (as `dstk/`), `tests/`, `examples/`, `pytest.ini` (and `scripts/*.py` + `assets/report_templates/` if you want the Senior-mode gate); `pip install -r requirements-dev.txt`; `pytest`. Hook-based tests run against `examples/project_hooks_example.py` and, when `project_hooks.py` exists, against the project; unimplemented hooks make their tests skip. Skipping `examples/` is allowed: the hook-based tests then skip with a message instead of failing, and the rest of the suite still runs.
 
 ---
 

@@ -25,6 +25,10 @@ CLAIM_AR = ["بشكل كبير", "تحسن كبير", "يتفوق", "دقة عا
 _FENCE = re.compile(r"```.*?```", re.S)
 _INLINE = re.compile(r"`[^`\n]*`")
 _LINK = re.compile(r"\]\([^)]*\)")
+# A quoted word is a MENTION, not a claim: "a README that says "state-of-the-art" with no evidence"
+# must not be flagged as hype. Apostrophes are deliberately excluded so English contractions
+# ("model's") cannot swallow a whole sentence.
+_QUOTED = re.compile(r'"[^"\n]*"|\u201c[^\u201d\n]*\u201d|\u00ab[^\u00bb\n]*\u00bb')
 _NUM = re.compile(r"(?<![\w.])(-?\d{1,3}(?:,\d{3})+(?:\.\d+)?|-?\d+\.\d+|-?\d+)(%?)(?![\w])")
 
 
@@ -34,9 +38,14 @@ def _strip_code(text: str) -> str:
     return _LINK.sub("]", text)
 
 
+def _strip_quotes(text: str) -> str:
+    return _QUOTED.sub(lambda m: " " * len(m.group(0)), text)
+
+
 def find_hype(text: str) -> List[Dict[str, Any]]:
-    """Return hype (error) and claim (warning) hits with line numbers."""
-    clean = _strip_code(text)
+    """Return hype (error) and claim (warning) hits with line numbers. Quoted words are mentions
+    (documenting a forbidden phrase, or a quotation of someone else's claim) and are not flagged."""
+    clean = _strip_quotes(_strip_code(text))
     hits: List[Dict[str, Any]] = []
     for ln, line in enumerate(clean.splitlines(), start=1):
         low = line.lower()

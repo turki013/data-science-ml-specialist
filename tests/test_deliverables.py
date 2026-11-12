@@ -13,11 +13,16 @@ from dstk.results_io import write_results
 ROOT = Path(__file__).resolve().parents[1]
 INIT = ROOT / "scripts" / "init_reports.py"
 CHECK = ROOT / "scripts" / "check_deliverables.py"
+TEMPLATES = ROOT / "assets" / "report_templates"
+
+if not (INIT.exists() and CHECK.exists() and TEMPLATES.is_dir()):
+    pytest.skip("scripts/ or assets/report_templates/ is not installed: the deliverables gate tests need "
+                "both (see SKILL.md, 'Setup in a project')", allow_module_level=True)
 
 
 def _scaffold(tmp_path):
     subprocess.run([sys.executable, str(INIT), "--project", "Demo", "--dest", str(tmp_path / "reports")],
-                   cwd=tmp_path, check=True, capture_output=True)
+                   cwd=tmp_path, check=True, capture_output=True, stdin=subprocess.DEVNULL)
     (tmp_path / "README.md").write_text((tmp_path / "README_TEMPLATE.md").read_text(encoding="utf-8"), encoding="utf-8")
 
 
@@ -37,7 +42,8 @@ def test_scaffold_creates_all_deliverables_and_does_not_overwrite(tmp_path):
     assert "Demo" in (rep / "model_card.md").read_text(encoding="utf-8")
     assert json.loads((rep / "params.json").read_text(encoding="utf-8"))["seed"] == 42
     (rep / "model_card.md").write_text("my edits", encoding="utf-8")
-    subprocess.run([sys.executable, str(INIT), "--project", "Demo", "--dest", str(rep)], cwd=tmp_path, check=True, capture_output=True)
+    subprocess.run([sys.executable, str(INIT), "--project", "Demo", "--dest", str(rep)], cwd=tmp_path,
+                   check=True, capture_output=True, stdin=subprocess.DEVNULL)
     assert (rep / "model_card.md").read_text(encoding="utf-8") == "my edits"
 
 
@@ -48,7 +54,8 @@ def test_gate_fails_on_fresh_scaffold_and_passes_when_complete(tmp_path):
     assert any(PLACEHOLDER in p for p in problems) and any("experiments.jsonl is empty" in p for p in problems)
     _fill(tmp_path)
     assert check_deliverables(tmp_path) == []
-    r = subprocess.run([sys.executable, str(CHECK), "--root", str(tmp_path)], capture_output=True, text=True)
+    r = subprocess.run([sys.executable, str(CHECK), "--root", str(tmp_path)], capture_output=True, text=True,
+                       stdin=subprocess.DEVNULL)
     assert r.returncode == 0 and "OK" in r.stdout
 
 
@@ -63,7 +70,8 @@ def test_gate_blocks_hand_edited_results_hype_and_unverified_numbers(tmp_path):
     data = json.loads(res.read_text(encoding="utf-8")); data["holdout"]["mape_pct"] = 9.99
     res.write_text(json.dumps(data), encoding="utf-8")
     assert any("changed after it was written" in p for p in check_deliverables(tmp_path))
-    r = subprocess.run([sys.executable, str(CHECK), "--root", str(tmp_path)], capture_output=True, text=True)
+    r = subprocess.run([sys.executable, str(CHECK), "--root", str(tmp_path)], capture_output=True, text=True,
+                       stdin=subprocess.DEVNULL)
     assert r.returncode == 1 and "FAILED" in r.stdout
 
 

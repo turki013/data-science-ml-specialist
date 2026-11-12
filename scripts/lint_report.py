@@ -12,6 +12,12 @@ import argparse
 import sys
 from pathlib import Path
 
+# Reports are often written in Arabic; a Windows console defaults to cp1252 and would crash on
+# print(). Force UTF-8 on stdout/stderr so the linter never dies while reporting a violation.
+for _stream in (sys.stdout, sys.stderr):
+    if hasattr(_stream, "reconfigure"):
+        _stream.reconfigure(encoding="utf-8", errors="replace")
+
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from dstk.report_lint import lint_file  # noqa: E402
 
