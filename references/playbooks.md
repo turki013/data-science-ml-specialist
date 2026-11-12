@@ -302,7 +302,8 @@ Anything beyond this belongs in a dedicated anomaly-detection skill.
 4. **Analyze** once, as planned: effect with a confidence interval, not only a p-value; adjust for multiple metrics/variants (Holm or Benjamini-Hochberg); CUPED can reduce variance using a pre-experiment covariate.
 5. **Report** practical significance (is the interval inside the range that matters?), novelty effects, and segments only as hypotheses.
 
-The bundled experiment is the useful case, not the clean one: conversion rises **+2.25pp** (95% CI
+The bundled experiment is the useful case, not the clean one. Its treatment effect is **simulated** (the data
+is generated): conversion rises **+2.25pp** (95% CI
 [+0.46, +4.04], p = 0.014) while **support tickets per user rise ~27%**. A review that reports only the primary
 metric has not reported the decision. It also shows CUPED cutting variance by ~75% without moving the point
 estimate, and an 80%-power requirement (~2,600 per arm) above the fixture's 2,000 — which is why the test calls

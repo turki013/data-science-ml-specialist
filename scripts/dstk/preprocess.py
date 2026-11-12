@@ -21,6 +21,11 @@ class QuantileWinsorizer(BaseEstimator, TransformerMixin):
         self.columns_ = np.asarray(df.columns, dtype=object)
         self.lo_ = df.quantile(self.lower).to_numpy(dtype=float)
         self.hi_ = df.quantile(self.upper).to_numpy(dtype=float)
+        empty = np.isnan(self.lo_) | np.isnan(self.hi_)
+        if empty.any():   # an all-missing column has no bounds; clipping silently would return all-NaN
+            bad = [c for c, e in zip(self.columns_, empty) if e]
+            raise ValueError(f"QuantileWinsorizer cannot learn bounds for {bad}: no non-missing values. "
+                             f"Drop the column or impute before winsorizing.")
         return self
 
     def transform(self, X):

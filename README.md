@@ -1,4 +1,4 @@
-﻿<p align="center">
+<p align="center">
   <img src="assets/logo.svg" alt="data-science-ml-specialist logo" width="80" height="80">
 </p>
 
@@ -11,7 +11,7 @@
 
 <p align="center">
   <img alt="Agent Skill" src="https://img.shields.io/badge/agent-skill-2563EB">
-  <img alt="Python" src="https://img.shields.io/badge/python-3.9%2B-3776AB?logo=python&logoColor=white">
+  <img alt="Python" src="https://img.shields.io/badge/python-3.10%2B-3776AB?logo=python&logoColor=white">
   <img alt="Tests" src="https://img.shields.io/badge/tests-pytest-0A9EDC?logo=pytest&logoColor=white">
   <img alt="License" src="https://img.shields.io/badge/license-MIT-10B981">
   <img alt="PRs welcome" src="https://img.shields.io/badge/PRs-welcome-22D3EE">
@@ -80,7 +80,7 @@ test that proves the matching guard fires on the file:
 | `churn_leaky.csv` | 1,793 | two post-outcome columns (AUC 0.98 and 1.00) and repeated customers |
 | `sales_daily.csv` | 731 | a time series a random split will happily destroy |
 | `listings_ar.csv` | 200 | Arabic re-listings: same property, different digits, punctuation and price |
-| `experiment_ab.csv` | 4,000 | a real +2.2pp lift, and a guardrail that moves the wrong way |
+| `experiment_ab.csv` | 4,000 | a simulated treatment effect (+2.2pp), and a guardrail that moves the wrong way |
 | `interactions.csv` | 3,272 | implicit feedback where popularity is *worse* than random |
 
 `python examples/make_datasets.py --check` proves the committed CSVs still match the generator;
@@ -98,7 +98,7 @@ We benchmarked an end-to-end customer churn classification task on tabular data 
 | **Statistical Rigor** | Mean/std printout only | 95% Bootstrap CIs + Wilcoxon paired difference test vs baselines |
 | **Slice & Bias Analysis** | Omitted | Explicit demographic & behavior subgroup evaluation (age > 50, low spend, tenure segments) |
 | **Results Authenticity** | Unverified console stdout (`print`) | Machine-verifiable `results.json` + canonical SHA-256 literal hash tracking |
-| **Verification & Tests** | 0 tests run | This repo's suite: **206 passed, 2 skipped, 0 failed** (Python 3.14 / Windows; CI runs the same suite on 3.11 / Ubuntu) + report linter on every report |
+| **Verification & Tests** | 0 tests run | This repo's suite: **225 passed, 2 skipped, 0 failed** (Python 3.14 / Windows locally; CI runs the same suite on 3.10-3.13, Ubuntu and Windows) + report linter on every report |
 | **Deliverables & Audits** | 1 standalone Python file | 4 production markdown reports (Brief, Audit, Card, Final Report) + serialized joblib artifact |
 
 ### Scope of this comparison (read before quoting it)

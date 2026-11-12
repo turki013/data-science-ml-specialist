@@ -152,7 +152,7 @@ better counts as equivalent; among best and its equivalents, choose the simplest
 
 | API | Contract |
 |---|---|
-| `preprocess.py::QuantileWinsorizer` | `fit` learns per-column quantiles; `transform` clips and returns a DataFrame that keeps its column names (and refuses columns it was not fitted on). Put it inside the Pipeline so CV refits per fold; it never drops rows. |
+| `preprocess.py::QuantileWinsorizer` | `fit` learns per-column quantiles and refuses a column with no non-missing values (clipping it would silently return all-NaN); `transform` clips and returns a DataFrame that keeps its column names, and refuses columns it was not fitted on. Put it inside the Pipeline so CV refits per fold; it never drops rows. |
 | `preprocess.py::fit_iqr_bounds` | Tukey fences per column: `(Q1 − k·IQR, Q3 + k·IQR)`, learned on train. |
 | `preprocess.py::robust_zscore` | `0.6745 · (x − median) / MAD`; pass train-derived `center`/`mad` when scoring other data; MAD = 0 returns zeros instead of exploding. |
 | `preprocess.py::outlier_flags` | Boolean frame: outside a fence, given train-learned bounds. |

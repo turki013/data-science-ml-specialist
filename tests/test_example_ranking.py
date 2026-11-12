@@ -50,8 +50,8 @@ def test_leave_last_out_keeps_every_user_future_out_of_train(splits):
 
 def test_baselines_are_measured_not_assumed(relevance, splits, items):
     """Random and popularity are both cheap, and neither is guaranteed to win: on this fixture popularity
-    is actually WORSE than a random top-10 (0.043 vs 0.054 NDCG@10), because the popular items are the
-    ones every user has already seen. Report both baselines and let the numbers decide."""
+    is actually WORSE than a random top-10, because the popular items are the ones every user has already
+    seen. Report both baselines and let the numbers decide."""
     train, _, _ = splits
     order = np.argsort(-pb.popularity_scores(train, items, item="item_id"), kind="stable")
     popular = {u: [items[j] for j in order[:K]] for u in relevance}
@@ -61,6 +61,12 @@ def test_baselines_are_measured_not_assumed(relevance, splits, items):
     m_rand = R.evaluate_rankings(random, relevance, ks=(K,), n_boot=200)["metrics"][f"NDCG@{K}"]["mean"]
     print(f"NDCG@{K}: popularity {m_pop:.3f}  random {m_rand:.3f}")
     assert 0 < m_pop < 0.15 and 0 < m_rand < 0.15       # both are weak rankers on a topic-structured catalog
+    # The explicit claim the playbook makes (section 1.3): popularity LOSES to random here, because the
+    # popular items are the ones every user has already seen. If this ever flips, the fixture changed and
+    # the lesson in references/playbooks.md is stale -- fix the doc, do not silence the assert.
+    assert m_pop < m_rand, (
+        f"popularity ({m_pop:.4f}) is no longer below random ({m_rand:.4f}) at NDCG@{K}; "
+        f"the fixture or the split changed, and playbooks.md section 1.3 now overstates the case")
 
 
 def test_item_knn_beats_both_baselines_on_the_same_users(relevance, splits, items):

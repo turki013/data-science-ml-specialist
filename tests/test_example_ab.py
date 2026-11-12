@@ -1,4 +1,4 @@
-"""A/B experiment on the bundled fixture: clean assignment, a real lift, and a guardrail that moves
+"""A/B experiment on the bundled fixture: clean assignment, a SIMULATED treatment effect, and a guardrail that moves
 the wrong way.
 
 The senior point is not "the test was significant". It is that significance on the primary metric
@@ -40,7 +40,7 @@ def test_primary_metric_has_a_significant_lift_with_an_interval(arms):
                               int(treatment["converted"].sum()), len(treatment))
     print(f"control {r['p1']:.4f} treatment {r['p2']:.4f} diff {r['diff']:+.4f} "
           f"CI [{r['ci_lo']:+.4f}, {r['ci_hi']:+.4f}] p={r['p_value']:.4f}")
-    assert r["p_value"] < 0.05 and r["ci_lo"] > 0        # the fixture ships a real +2pp lift
+    assert r["p_value"] < 0.05 and r["ci_lo"] > 0        # planted +2pp treatment effect (synthetic data)
     assert 0.015 < r["diff"] < 0.035
 
 

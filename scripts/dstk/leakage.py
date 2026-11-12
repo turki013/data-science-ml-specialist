@@ -149,8 +149,10 @@ def single_feature_auc_scan(X: pd.DataFrame, y, top: int = 10, flag_above: float
     """Binary targets only: per-feature AUC (direction-free). Very high values suggest a
     target-derived or post-outcome column; investigate before modeling."""
     y = np.asarray(y)
-    if len(np.unique(y)) != 2:
-        raise ValueError("single_feature_auc_scan supports binary targets only")
+    n_classes = len(np.unique(y))
+    if n_classes != 2:
+        raise ValueError(f"single_feature_auc_scan supports binary targets only; got {n_classes} distinct "
+                         f"label value(s) for {len(y)} row(s)")
     rows: List[Tuple[str, float]] = []
     for c in X.columns:
         s = pd.to_numeric(X[c], errors="coerce")
